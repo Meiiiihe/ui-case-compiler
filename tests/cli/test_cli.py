@@ -118,3 +118,40 @@ def test_compile_nl_command_writes_plan(tmp_path, monkeypatch) -> None:
     assert result.exit_code == 0
     assert output_path.exists()
     assert "natural_language" in output_path.read_text(encoding="utf-8")
+
+
+def test_record_command_writes_plan(tmp_path) -> None:
+    output_path = tmp_path / "plan.json"
+
+    events = [
+        {"type": "navigation", "timestamp": 0, "url": "https://example.test/login"},
+        {
+            "type": "input",
+            "timestamp": 1,
+            "value": "alice",
+            "element": {"tag": "input", "label": "Username", "css": "#username"},
+        },
+        {
+            "type": "click",
+            "timestamp": 2,
+            "element": {"tag": "button", "role": "button", "text": "Login"},
+        },
+    ]
+
+    async def fake_record(self, url: str):
+        from ui_case_compiler.recorder.event_collector import EventCollector
+
+        return EventCollector().collect(events)
+
+    with patch(
+        "ui_case_compiler.recorder.live_recorder.LiveRecorder.record",
+        fake_record,
+    ):
+        result = runner.invoke(
+            app,
+            ["record", "https://example.test/login", "--name", "Rec", "-o", str(output_path)],
+        )
+
+    assert result.exit_code == 0
+    assert output_path.exists()
+    assert "recording" in output_path.read_text(encoding="utf-8")
