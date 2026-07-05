@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Login Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      color: #1f2937;
+    }
+    main {
+      max-width: 360px;
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+    }
+    input {
+      box-sizing: border-box;
+      display: block;
+      margin-top: 6px;
+      padding: 8px;
+      width: 100%;
+    }
+    button {
+      margin-top: 20px;
+      padding: 8px 14px;
+    }
+    [role="status"] {
+      margin-top: 20px;
+      font-weight: 700;
+      color: #047857;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Login</h1>
+    <form id="login-form">
+      <label>
+        Username
+        <input id="username" name="username" autocomplete="username">
+      </label>
+      <label>
+        Password
+        <input id="password" name="password" type="password" autocomplete="current-password">
+      </label>
+      <button type="submit">Login</button>
+    </form>
+    <p id="message" role="status"></p>
+  </main>
+  <script>
+    document.getElementById("login-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      document.getElementById("message").textContent = "Welcome back";
+    });
+  </script>
+</body>
+</html>

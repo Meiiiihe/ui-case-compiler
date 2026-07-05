@@ -20,6 +20,20 @@ class CompileRecordingRequest(BaseModel):
     name: str = "Recorded Flow"
 
 
+class StartRecordingRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    url: str
+    name: str = "Recorded Flow"
+
+
+class RecordingSessionResponse(BaseModel):
+    session_id: str
+    url: str
+    name: str
+    status: str = "recording"
+
+
 class RunRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

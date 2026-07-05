@@ -3,10 +3,16 @@ from unittest.mock import patch
 
 import pytest
 
-from ui_case_compiler.api.models import CompileNlRequest, CompileRecordingRequest, RunRequest
+from ui_case_compiler.api.models import (
+    CompileNlRequest,
+    CompileRecordingRequest,
+    RunRequest,
+    StartRecordingRequest,
+)
 from ui_case_compiler.api.service import ApiService, NotFoundError
 from ui_case_compiler.compiler.page_context_collector import PageContext
 from ui_case_compiler.config import LLMConfig, RuntimeConfig
+from ui_case_compiler.recorder.recorder_session import RecordedElement, RecordedEvent
 from ui_case_compiler.schema.validation import load_plan
 
 
@@ -83,6 +89,31 @@ async def test_compile_nl_uses_provider(tmp_path: Path) -> None:
         )
 
     assert plan.source == "natural_language"
+    assert plan.id in {s.id for s in service.list_cases()}
+
+
+@pytest.mark.asyncio
+async def test_start_and_stop_recording_saves_plan(tmp_path: Path) -> None:
+    service = ApiService(_config(tmp_path))
+
+    async def fake_record(self: object, url: str):
+        return [
+            RecordedEvent(type="navigation", timestamp=0, url=url),
+            RecordedEvent(
+                type="click",
+                timestamp=1,
+                element=RecordedElement(tag="button", role="button", text="Login"),
+            ),
+        ]
+
+    with patch("ui_case_compiler.recorder.live_recorder.LiveRecorder.record", fake_record):
+        started = await service.start_recording(
+            StartRecordingRequest(url="https://example.test/login", name="Live Rec")
+        )
+        plan = await service.stop_recording(started.session_id)
+
+    assert started.status == "recording"
+    assert plan.source == "recording"
     assert plan.id in {s.id for s in service.list_cases()}
 
 

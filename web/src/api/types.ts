@@ -88,6 +88,18 @@ export interface CompileRecordingRequest {
   name: string;
 }
 
+export interface StartRecordingRequest {
+  url: string;
+  name: string;
+}
+
+export interface RecordingSession {
+  session_id: string;
+  url: string;
+  name: string;
+  status: "recording";
+}
+
 export interface RunRequest {
   params: Record<string, string>;
   headed: boolean;

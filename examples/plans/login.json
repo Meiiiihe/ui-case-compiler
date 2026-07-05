@@ -1,0 +1,88 @@
+{
+  "id": "login-example",
+  "name": "Login Example",
+  "source": "manual",
+  "parameters": {
+    "username": "demo@example.com",
+    "password": "secret"
+  },
+  "steps": [
+    {
+      "id": "step-001",
+      "type": "navigate",
+      "url": "${loginPageUrl}"
+    },
+    {
+      "id": "step-002",
+      "type": "fill",
+      "target": {
+        "primary": {
+          "strategy": "label",
+          "value": "Username"
+        },
+        "fallbacks": [
+          {
+            "strategy": "css",
+            "value": "#username"
+          }
+        ],
+        "confidence": 0.9
+      },
+      "value": "${username}"
+    },
+    {
+      "id": "step-003",
+      "type": "fill",
+      "target": {
+        "primary": {
+          "strategy": "label",
+          "value": "Password"
+        },
+        "fallbacks": [
+          {
+            "strategy": "css",
+            "value": "#password"
+          }
+        ],
+        "confidence": 0.9
+      },
+      "value": "${password}"
+    },
+    {
+      "id": "step-004",
+      "type": "click",
+      "target": {
+        "primary": {
+          "strategy": "role",
+          "role": "button",
+          "name": "Login"
+        },
+        "fallbacks": [
+          {
+            "strategy": "text",
+            "value": "Login"
+          }
+        ],
+        "confidence": 0.95
+      }
+    },
+    {
+      "id": "step-005",
+      "type": "assert_text",
+      "target": {
+        "primary": {
+          "strategy": "text",
+          "value": "Welcome back"
+        },
+        "fallbacks": [
+          {
+            "strategy": "css",
+            "value": "#message"
+          }
+        ],
+        "confidence": 0.8
+      },
+      "expected": "Welcome back"
+    }
+  ]
+}

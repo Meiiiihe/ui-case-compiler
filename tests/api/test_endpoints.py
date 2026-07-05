@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from ui_case_compiler.api.app import create_app
 from ui_case_compiler.config import LLMConfig, RuntimeConfig
+from ui_case_compiler.recorder.recorder_session import RecordedElement, RecordedEvent
 
 
 def _client(tmp_path: Path, api_key: str | None = "sk-test") -> TestClient:
@@ -47,6 +48,33 @@ def test_compile_recording_then_get_and_list(tmp_path: Path) -> None:
     got = client.get(f"/api/cases/{plan_id}")
     assert got.status_code == 200
     assert got.json()["source"] == "recording"
+
+
+def test_start_and_stop_recording_endpoint(tmp_path: Path) -> None:
+    client = _client(tmp_path)
+
+    async def fake_record(self: object, url: str):
+        return [
+            RecordedEvent(type="navigation", timestamp=0, url=url),
+            RecordedEvent(
+                type="click",
+                timestamp=1,
+                element=RecordedElement(tag="button", role="button", text="Login"),
+            ),
+        ]
+
+    with patch("ui_case_compiler.recorder.live_recorder.LiveRecorder.record", fake_record):
+        start = client.post(
+            "/api/recordings/start",
+            json={"url": "https://example.test/login", "name": "Live Rec"},
+        )
+        assert start.status_code == 200
+        session_id = start.json()["session_id"]
+
+        stop = client.post(f"/api/recordings/{session_id}/stop")
+
+    assert stop.status_code == 200
+    assert stop.json()["source"] == "recording"
 
 
 def test_get_missing_case_returns_404(tmp_path: Path) -> None:

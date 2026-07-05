@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "./client";
-import { compileNl, listCases, runCase, validateCase } from "./cases";
+import { compileNl, listCases, runCase, startRecording, stopRecording, validateCase } from "./cases";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -25,6 +25,27 @@ describe("cases api", () => {
     await validateCase("p1");
     expect(spy).toHaveBeenCalledWith(
       "/cases/p1/validate",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("startRecording posts to /recordings/start", async () => {
+    const spy = vi.spyOn(client, "apiFetch").mockResolvedValue({ session_id: "rec-1" });
+    await startRecording({ url: "https://x", name: "Live" });
+    expect(spy).toHaveBeenCalledWith(
+      "/recordings/start",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ url: "https://x", name: "Live" }),
+      }),
+    );
+  });
+
+  it("stopRecording posts to /recordings/{id}/stop", async () => {
+    const spy = vi.spyOn(client, "apiFetch").mockResolvedValue({ id: "plan-1" });
+    await stopRecording("rec-1");
+    expect(spy).toHaveBeenCalledWith(
+      "/recordings/rec-1/stop",
       expect.objectContaining({ method: "POST" }),
     );
   });

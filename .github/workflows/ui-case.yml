@@ -1,0 +1,41 @@
+name: ui-case
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -m playwright install --with-deps chromium
+
+      - name: Quality gates
+        run: |
+          python -m ruff check .
+          python -m mypy src
+          python -m pytest
+
+      - name: Run example UI case
+        run: |
+          PAGE_URL="$(python -c "from pathlib import Path; print(Path('examples/pages/login.html').resolve().as_uri())")"
+          ui-case validate examples/plans/login.json
+          ui-case run examples/plans/login.json --param loginPageUrl="$PAGE_URL"
+
+      - name: Upload UI case artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-case-artifacts
+          path: .ui-case-compiler

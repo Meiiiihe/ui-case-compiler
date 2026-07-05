@@ -39,7 +39,7 @@ export function CaseDetailPage() {
     setValidateMsg(null);
     await action.run(async () => {
       const resp = await validateCase(caseId!);
-      setValidateMsg(resp.valid ? `valid (${resp.step_count} steps)` : "invalid");
+      setValidateMsg(resp.valid ? `校验通过（${resp.step_count} 步）` : "校验失败");
       return resp;
     });
   }
@@ -56,35 +56,73 @@ export function CaseDetailPage() {
   const p = plan.data;
 
   return (
-    <div>
+    <div className="page-stack">
       <ErrorBanner message={plan.error ?? action.error} />
       <Spinner show={plan.loading} />
       {p && (
         <>
-          <h2>{p.name}</h2>
-          <p>
-            ID: <code>{p.id}</code> · 来源: {p.source} · base_url: {p.base_url ?? "—"}
-          </p>
-          <StepList steps={p.steps} />
-          <h3>运行参数(每行 key=value)</h3>
-          <textarea
-            aria-label="运行参数"
-            value={paramsText}
-            onChange={(e) => setParamsText(e.target.value)}
-            rows={3}
-          />
-          <div>
-            <button onClick={doValidate} disabled={action.loading}>
-              Validate
-            </button>
-            <button onClick={() => doRun("dry")} disabled={action.loading}>
-              Dry-run
-            </button>
-            <button onClick={() => doRun("run")} disabled={action.loading}>
-              Run
-            </button>
+          <div className="page-title">
+            <div>
+              <p className="eyebrow">Case Detail</p>
+              <h1>{p.name}</h1>
+            </div>
+            <span className="source-badge">{p.source}</span>
           </div>
-          {validateMsg && <p>{validateMsg}</p>}
+          <section className="panel meta-panel">
+            <div>
+              <span className="meta-label">计划 ID</span>
+              <code>{p.id}</code>
+            </div>
+            <div>
+              <span className="meta-label">Base URL</span>
+              <span>{p.base_url ?? "未设置"}</span>
+            </div>
+            <div>
+              <span className="meta-label">步骤数</span>
+              <strong>{p.steps.length}</strong>
+            </div>
+          </section>
+          <section className="panel">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Executable Plan</p>
+                <h2>步骤明细</h2>
+              </div>
+            </div>
+            <StepList steps={p.steps} />
+          </section>
+          <section className="panel run-panel">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Run Control</p>
+                <h2>运行控制</h2>
+              </div>
+              <span className="hint">每行一个 key=value</span>
+            </div>
+            <label className="field field-wide">
+              <span>运行参数</span>
+              <textarea
+                aria-label="运行参数"
+                value={paramsText}
+                onChange={(e) => setParamsText(e.target.value)}
+                rows={4}
+                spellCheck={false}
+                placeholder="loginPageUrl=file:///F:/.../login.html&#10;username=demo@example.com"
+              />
+            </label>
+            <div className="button-row">
+              <button className="secondary-action" onClick={doValidate} disabled={action.loading}>
+                校验计划
+              </button>
+              <button className="secondary-action" onClick={() => doRun("dry")} disabled={action.loading}>
+                试运行
+              </button>
+              <button className="primary-action" onClick={() => doRun("run")} disabled={action.loading}>
+                正式运行
+              </button>
+            </div>
+            {validateMsg && <p className="success-note">{validateMsg}</p>}
+          </section>
         </>
       )}
     </div>

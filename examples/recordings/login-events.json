@@ -1,0 +1,37 @@
+[
+  {
+    "type": "navigation",
+    "timestamp": 1,
+    "url": "${loginPageUrl}"
+  },
+  {
+    "type": "input",
+    "timestamp": 2,
+    "value": "demo@example.com",
+    "element": {
+      "tag": "input",
+      "label": "Username",
+      "css": "#username"
+    }
+  },
+  {
+    "type": "input",
+    "timestamp": 3,
+    "value": "secret",
+    "element": {
+      "tag": "input",
+      "label": "Password",
+      "css": "#password"
+    }
+  },
+  {
+    "type": "click",
+    "timestamp": 4,
+    "element": {
+      "tag": "button",
+      "role": "button",
+      "text": "Login",
+      "css": "button[type=submit]"
+    }
+  }
+]

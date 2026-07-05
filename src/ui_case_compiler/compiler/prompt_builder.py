@@ -55,7 +55,12 @@ A Locator uses exactly one strategy. Its required fields depend on strategy:
 
 Do NOT invent keys like "locator_candidates", "expected_value", "label", or
 "css" as top-level locator keys. A locator ALWAYS has a "strategy" field, and
-non-role strategies carry their selector in "value"."""
+non-role strategies carry their selector in "value".
+
+For interactive elements, prefer user-facing locators such as role, label,
+placeholder, or text. If you must use a CSS selector for input/click targets,
+prefer a visible selector such as "#kw:visible" and include semantic fallbacks
+when possible. Never intentionally target hidden elements."""
 
 _EXAMPLE = """\
 Example. For the case "打开登录页，输入用户名和密码，点击 Login 按钮，并验证出现 Welcome back"

@@ -4,8 +4,10 @@ import type {
   CompileNlRequest,
   CompileRecordingRequest,
   ExecutablePlan,
+  RecordingSession,
   RunRequest,
   RunResult,
+  StartRecordingRequest,
   ValidateResponse,
 } from "./types";
 
@@ -24,6 +26,19 @@ export function compileRecording(req: CompileRecordingRequest): Promise<Executab
   return apiFetch<ExecutablePlan>("/cases/compile-recording", {
     method: "POST",
     body: JSON.stringify(req),
+  });
+}
+
+export function startRecording(req: StartRecordingRequest): Promise<RecordingSession> {
+  return apiFetch<RecordingSession>("/recordings/start", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function stopRecording(sessionId: string): Promise<ExecutablePlan> {
+  return apiFetch<ExecutablePlan>(`/recordings/${sessionId}/stop`, {
+    method: "POST",
   });
 }
 

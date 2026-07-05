@@ -1,0 +1,6 @@
+{
+  "url": "https://example.test/login",
+  "title": "Login Example",
+  "accessibility_tree": "Page contains Username input, Password input, Login button, and a status area.",
+  "dom_summary": "form#login-form input#username input#password button[type=submit] p#message"
+}

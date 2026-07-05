@@ -45,8 +45,8 @@ describe("CaseDetailPage", () => {
     });
     renderAt();
     await waitFor(() => expect(screen.getByText("Login")).toBeInTheDocument());
-    await userEvent.click(screen.getByRole("button", { name: "Validate" }));
-    await waitFor(() => expect(screen.getByText("valid (1 steps)")).toBeInTheDocument());
+    await userEvent.click(screen.getByRole("button", { name: "校验计划" }));
+    await waitFor(() => expect(screen.getByText("校验通过（1 步）")).toBeInTheDocument());
   });
 
   it("runs and navigates to run detail", async () => {
@@ -64,7 +64,7 @@ describe("CaseDetailPage", () => {
     });
     renderAt();
     await waitFor(() => expect(screen.getByText("Login")).toBeInTheDocument());
-    await userEvent.click(screen.getByRole("button", { name: "Run" }));
+    await userEvent.click(screen.getByRole("button", { name: "正式运行" }));
     await waitFor(() => expect(screen.getByText("RUN PAGE")).toBeInTheDocument());
   });
 });

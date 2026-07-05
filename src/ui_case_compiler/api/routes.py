@@ -5,7 +5,9 @@ from fastapi import APIRouter, Request
 from ui_case_compiler.api.models import (
     CompileNlRequest,
     CompileRecordingRequest,
+    RecordingSessionResponse,
     RunRequest,
+    StartRecordingRequest,
     ValidateResponse,
 )
 from ui_case_compiler.api.service import ApiService
@@ -35,6 +37,19 @@ async def compile_nl(request: Request, body: CompileNlRequest) -> ExecutablePlan
 @router.post("/cases/compile-recording", response_model=ExecutablePlan)
 def compile_recording(request: Request, body: CompileRecordingRequest) -> ExecutablePlan:
     return _service(request).compile_recording(body)
+
+
+@router.post("/recordings/start", response_model=RecordingSessionResponse)
+async def start_recording(
+    request: Request,
+    body: StartRecordingRequest,
+) -> RecordingSessionResponse:
+    return await _service(request).start_recording(body)
+
+
+@router.post("/recordings/{session_id}/stop", response_model=ExecutablePlan)
+async def stop_recording(request: Request, session_id: str) -> ExecutablePlan:
+    return await _service(request).stop_recording(session_id)
 
 
 @router.get("/cases/{case_id}", response_model=ExecutablePlan)

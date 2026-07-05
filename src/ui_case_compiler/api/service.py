@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import asyncio
+from dataclasses import dataclass
+from uuid import uuid4
+
 from ui_case_compiler.api.models import (
     CompileNlRequest,
     CompileRecordingRequest,
+    RecordingSessionResponse,
     RunRequest,
+    StartRecordingRequest,
     ValidateResponse,
 )
 from ui_case_compiler.compiler.deepseek_provider import DeepSeekProvider
@@ -12,11 +18,13 @@ from ui_case_compiler.config import RuntimeConfig, load_config
 from ui_case_compiler.errors import (
     CompilationError,
     PlanValidationError,
+    RecordingError,
     StorageError,
     UiCaseCompilerError,
 )
 from ui_case_compiler.recorder.event_collector import EventCollector
-from ui_case_compiler.recorder.recorder_session import RecordingCompiler
+from ui_case_compiler.recorder.live_recorder import LiveRecorder
+from ui_case_compiler.recorder.recorder_session import RecordedEvent, RecordingCompiler
 from ui_case_compiler.reporter.run_result import RunResult
 from ui_case_compiler.runner.dry_run_service import DryRunService
 from ui_case_compiler.runner.plan_runner import PlanRunner, RunOptions
@@ -31,6 +39,15 @@ class NotFoundError(UiCaseCompilerError):
     """Raised when a requested case or run does not exist."""
 
 
+@dataclass
+class RecordingSession:
+    session_id: str
+    url: str
+    name: str
+    stop_event: asyncio.Event
+    task: asyncio.Task[list[RecordedEvent]]
+
+
 class ApiService:
     """Orchestrate the existing core for the HTTP API. No HTTP concepts here."""
 
@@ -39,6 +56,7 @@ class ApiService:
         store = FileStore(self._config.output_dir)
         self._cases = CaseRepository(store)
         self._runs = RunRepository(store)
+        self._recordings: dict[str, RecordingSession] = {}
 
     def list_cases(self) -> list[CaseSummary]:
         return self._cases.list_summaries()
@@ -56,6 +74,40 @@ class ApiService:
     def compile_recording(self, req: CompileRecordingRequest) -> ExecutablePlan:
         events = EventCollector().collect(req.events)
         plan = RecordingCompiler().compile(events, req.name)
+        self._cases.save_plan(plan)
+        return plan
+
+    async def start_recording(self, req: StartRecordingRequest) -> RecordingSessionResponse:
+        if not req.url.strip():
+            msg = "录制起始 URL 不能为空"
+            raise RecordingError(msg)
+
+        session_id = f"rec-{uuid4().hex[:8]}"
+        stop_event = asyncio.Event()
+
+        async def wait_for_stop(page: object) -> None:
+            _ = page
+            await stop_event.wait()
+
+        recorder = LiveRecorder(self._config, wait_for_stop=wait_for_stop)
+        task = asyncio.create_task(recorder.record(req.url))
+        self._recordings[session_id] = RecordingSession(
+            session_id=session_id,
+            url=req.url,
+            name=req.name,
+            stop_event=stop_event,
+            task=task,
+        )
+        return RecordingSessionResponse(session_id=session_id, url=req.url, name=req.name)
+
+    async def stop_recording(self, session_id: str) -> ExecutablePlan:
+        session = self._recordings.pop(session_id, None)
+        if session is None:
+            raise NotFoundError(f"Recording session not found: {session_id}")
+
+        session.stop_event.set()
+        events = await session.task
+        plan = RecordingCompiler().compile(events, session.name)
         self._cases.save_plan(plan)
         return plan
 
