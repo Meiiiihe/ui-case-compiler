@@ -4,9 +4,11 @@ import asyncio
 from pathlib import Path
 
 import typer
+import uvicorn
 from pydantic import ValidationError
 
 from ui_case_compiler import __version__
+from ui_case_compiler.api.app import create_app
 from ui_case_compiler.compiler import DeepSeekProvider, NaturalLanguageCompiler, PageContext
 from ui_case_compiler.config import RuntimeConfig, load_config
 from ui_case_compiler.errors import UiCaseCompilerError
@@ -50,6 +52,8 @@ CONTEXT_OPTION = typer.Option(..., "--context", help="页面上下文 JSON 文�
 OUTPUT_DIR_OPTION = typer.Option(None, "--output-dir", help="执行产物输出目录。")
 HEADED_OPTION = typer.Option(False, "--headed", help="使用有界面浏览器运行。")
 PARAM_OPTION = typer.Option(None, "--param", help="运行时参数，格式为 key=value。")
+HOST_OPTION = typer.Option(None, "--host", help="API 绑定主机，默认 127.0.0.1。")
+PORT_OPTION = typer.Option(None, "--port", help="API 端口，默认 8000。")
 
 
 @app.callback()
@@ -70,6 +74,21 @@ def config() -> None:
     """输出默认运行配置。"""
 
     typer.echo(load_config().model_dump_json(indent=2))
+
+
+@app.command("serve")
+def serve_command(
+    host: str | None = HOST_OPTION,
+    port: int | None = PORT_OPTION,
+) -> None:
+    """启动本地 HTTP API 服务（默认绑 127.0.0.1，仅供本地使用）。"""
+
+    config_value = load_config()
+    uvicorn.run(
+        create_app(config_value),
+        host=host or config_value.api.host,
+        port=port or config_value.api.port,
+    )
 
 
 @app.command("validate")

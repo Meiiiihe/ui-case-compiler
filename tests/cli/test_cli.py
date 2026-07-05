@@ -155,3 +155,14 @@ def test_record_command_writes_plan(tmp_path) -> None:
     assert result.exit_code == 0
     assert output_path.exists()
     assert "recording" in output_path.read_text(encoding="utf-8")
+
+
+def test_serve_command_invokes_uvicorn() -> None:
+    with patch("uvicorn.run") as mock_run:
+        result = runner.invoke(app, ["serve", "--port", "9123"])
+
+    assert result.exit_code == 0
+    assert mock_run.called
+    kwargs = mock_run.call_args.kwargs
+    assert kwargs["port"] == 9123
+    assert kwargs["host"] == "127.0.0.1"
