@@ -37,3 +37,24 @@ def test_llm_config_reads_environment(monkeypatch) -> None:
     assert config.llm.api_key == "sk-test"
     assert config.llm.base_url == "https://custom.example"
     assert config.llm.model == "deepseek-reasoner"
+
+
+def test_api_config_defaults(monkeypatch) -> None:
+    monkeypatch.delenv("API_HOST", raising=False)
+    monkeypatch.delenv("API_PORT", raising=False)
+
+    config = load_config()
+
+    assert config.api.host == "127.0.0.1"
+    assert config.api.port == 8000
+    assert "http://localhost:5173" in config.api.cors_origins
+
+
+def test_api_config_reads_environment(monkeypatch) -> None:
+    monkeypatch.setenv("API_HOST", "0.0.0.0")
+    monkeypatch.setenv("API_PORT", "9001")
+
+    config = load_config()
+
+    assert config.api.host == "0.0.0.0"
+    assert config.api.port == 9001
