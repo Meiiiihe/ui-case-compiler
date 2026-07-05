@@ -1,0 +1,15 @@
+:root { font-family: system-ui, Arial, sans-serif; color: #1f2937; }
+body { margin: 0; }
+.app-header { padding: 12px 20px; background: #f3f4f6; border-bottom: 1px solid #d1d5db; }
+.app-header a { font-weight: 700; color: #1f2937; text-decoration: none; }
+.app-main { padding: 20px; max-width: 900px; margin: 0 auto; }
+table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+th, td { border: 1px solid #d1d5db; padding: 6px 10px; text-align: left; }
+th { background: #f3f4f6; }
+.passed { color: #047857; font-weight: 700; }
+.failed { color: #b91c1c; font-weight: 700; }
+.skipped { color: #92400e; font-weight: 700; }
+.error-banner { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; padding: 8px 12px; margin: 8px 0; }
+button { padding: 6px 12px; margin-right: 8px; cursor: pointer; }
+textarea, input { font-family: inherit; padding: 6px; box-sizing: border-box; }
+.tab-active { font-weight: 700; }
