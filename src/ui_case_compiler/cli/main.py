@@ -11,6 +11,7 @@ from ui_case_compiler.compiler import DeepSeekProvider, NaturalLanguageCompiler,
 from ui_case_compiler.config import RuntimeConfig, load_config
 from ui_case_compiler.errors import UiCaseCompilerError
 from ui_case_compiler.recorder.event_collector import EventCollector
+from ui_case_compiler.recorder.live_recorder import LiveRecorder
 from ui_case_compiler.recorder.recorder_session import RecordingCompiler
 from ui_case_compiler.reporter.html_reporter import HtmlReporter
 from ui_case_compiler.reporter.run_result import RunResult
@@ -95,6 +96,22 @@ def compile_recording_command(
         plan = RecordingCompiler().compile(events, name)
         _write_or_print_plan(plan, output)
     except (UiCaseCompilerError, ValidationError, OSError, ValueError) as exc:
+        _fail(exc)
+
+
+@app.command("record")
+def record_command(
+    url: str,
+    name: str = NAME_OPTION,
+    output: Path | None = OUTPUT_OPTION,
+) -> None:
+    """启动浏览器实时录制用户操作并编译为可执行计划。"""
+
+    try:
+        events = asyncio.run(LiveRecorder().record(url))
+        plan = RecordingCompiler().compile(events, name)
+        _write_or_print_plan(plan, output)
+    except (UiCaseCompilerError, ValidationError, OSError) as exc:
         _fail(exc)
 
 
