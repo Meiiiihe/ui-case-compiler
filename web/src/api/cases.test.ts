@@ -1,6 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as client from "./client";
-import { compileNl, listCases, runCase, startRecording, stopRecording, validateCase } from "./cases";
+import {
+  batchRunCase,
+  compileNl,
+  listCases,
+  previewDataset,
+  runCase,
+  startRecording,
+  stopRecording,
+  validateCase,
+} from "./cases";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -58,6 +67,38 @@ describe("cases api", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ params: { a: "b" }, headed: false }),
+      }),
+    );
+  });
+
+  it("previewDataset posts to /datasets/preview", async () => {
+    const spy = vi.spyOn(client, "apiFetch").mockResolvedValue({ columns: [] });
+    await previewDataset({ filename: "login.csv", content_base64: "YQ==" });
+    expect(spy).toHaveBeenCalledWith(
+      "/datasets/preview",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ filename: "login.csv", content_base64: "YQ==" }),
+      }),
+    );
+  });
+
+  it("batchRunCase posts rows to /cases/{id}/batch-run", async () => {
+    const spy = vi.spyOn(client, "apiFetch").mockResolvedValue({ batch_id: "b1" });
+    await batchRunCase("p1", {
+      rows: [{ username: "alice" }],
+      concurrency: 2,
+      headed: false,
+    });
+    expect(spy).toHaveBeenCalledWith(
+      "/cases/p1/batch-run",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          rows: [{ username: "alice" }],
+          concurrency: 2,
+          headed: false,
+        }),
       }),
     );
   });

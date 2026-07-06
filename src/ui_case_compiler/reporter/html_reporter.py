@@ -29,7 +29,7 @@ REPORT_TEMPLATE = """<!doctype html>
   <p>Started: {{ result.started_at }}</p>
   <p>Ended: {{ result.ended_at }}</p>
   {% if result.trace_path %}
-  <p>Trace: <a href="{{ result.trace_path }}">{{ result.trace_path }}</a></p>
+  <p>Trace: <a href="/api/runs/{{ result.run_id }}/artifacts/trace">下载 trace.zip</a></p>
   {% endif %}
   <table>
     <thead>
@@ -52,7 +52,7 @@ REPORT_TEMPLATE = """<!doctype html>
         <td>{{ step.error or "" }}</td>
         <td>
           {% if step.screenshot %}
-          <a href="{{ step.screenshot }}">{{ step.screenshot }}</a>
+          <a href="/api/runs/{{ result.run_id }}/steps/{{ step.step_id }}/screenshot">查看截图</a>
           {% endif %}
         </td>
       </tr>
@@ -78,4 +78,3 @@ class HtmlReporter:
         report_path.write_text(html, encoding="utf-8")
         result.report_path = report_path
         return report_path
-

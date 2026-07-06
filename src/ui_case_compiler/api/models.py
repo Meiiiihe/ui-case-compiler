@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+import base64
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ui_case_compiler.compiler.page_context_collector import PageContext
 
@@ -38,6 +40,38 @@ class RunRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     params: dict[str, str] = Field(default_factory=dict)
+    headed: bool = False
+
+
+class DatasetPreviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    filename: str
+    content_base64: str
+
+    @field_validator("filename")
+    @classmethod
+    def filename_not_empty(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("文件名不能为空")
+        return value
+
+    def content_bytes(self) -> bytes:
+        return base64.b64decode(self.content_base64)
+
+
+class DatasetPreviewResponse(BaseModel):
+    columns: list[str]
+    rows: list[dict[str, str]]
+    preview_rows: list[dict[str, str]]
+    row_count: int
+
+
+class BatchRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    rows: list[dict[str, str]] = Field(min_length=1)
+    concurrency: int = Field(default=1, ge=1, le=8)
     headed: bool = False
 
 

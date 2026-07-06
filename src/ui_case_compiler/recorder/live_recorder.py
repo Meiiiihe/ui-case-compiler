@@ -7,6 +7,11 @@ from typing import Any
 
 from playwright.async_api import Frame, Page, async_playwright
 
+from ui_case_compiler.browser_profile import (
+    BROWSER_CONTEXT_OPTIONS,
+    STEALTH_INIT_SCRIPT,
+    browser_launch_args,
+)
 from ui_case_compiler.config import RuntimeConfig, load_config
 from ui_case_compiler.recorder.event_collector import EventCollector
 from ui_case_compiler.recorder.recorder_session import RecordedEvent
@@ -34,13 +39,17 @@ class LiveRecorder:
         script = _SCRIPT_PATH.read_text(encoding="utf-8")
 
         async with async_playwright() as pw:
-            browser = await pw.chromium.launch(headless=False)
-            context = await browser.new_context()
+            browser = await pw.chromium.launch(
+                headless=False,
+                args=browser_launch_args("chromium"),
+            )
+            context = await browser.new_context(**BROWSER_CONTEXT_OPTIONS)
 
             async def on_record(source: Any, payload: dict[str, Any]) -> None:
                 raw_events.append(payload)
 
             await context.expose_binding("__uicaseRecord", on_record)
+            await context.add_init_script(STEALTH_INIT_SCRIPT)
             await context.add_init_script(script=script)
             page = await context.new_page()
 

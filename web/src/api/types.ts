@@ -33,6 +33,7 @@ export interface Step {
   url?: string;
   target?: StepTarget;
   value?: string;
+  key?: string;
   expected?: string;
   duration_ms?: number;
   checked?: boolean;
@@ -67,6 +68,46 @@ export interface RunResult {
   trace_path: string | null;
   video_paths: string[];
   report_path: string | null;
+}
+
+export interface DatasetPreviewRequest {
+  filename: string;
+  content_base64: string;
+}
+
+export interface DatasetPreviewResponse {
+  columns: string[];
+  rows: Record<string, string>[];
+  preview_rows: Record<string, string>[];
+  row_count: number;
+}
+
+export interface BatchCaseResult {
+  index: number;
+  status: "passed" | "failed";
+  params: Record<string, string>;
+  run_id: string | null;
+  duration_ms: number;
+  error: string | null;
+}
+
+export interface BatchRunRequest {
+  rows: Record<string, string>[];
+  concurrency: number;
+  headed: boolean;
+}
+
+export interface BatchRunResult {
+  batch_id: string;
+  plan_id: string;
+  status: "passed" | "failed";
+  started_at: string;
+  ended_at: string;
+  total: number;
+  passed: number;
+  failed: number;
+  concurrency: number;
+  results: BatchCaseResult[];
 }
 
 export interface PageContext {

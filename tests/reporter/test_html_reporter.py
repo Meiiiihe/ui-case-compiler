@@ -11,6 +11,7 @@ def test_html_reporter_renders_failed_step(tmp_path: Path) -> None:
         status="failed",
         started_at=datetime.now(UTC),
         ended_at=datetime.now(UTC),
+        trace_path=Path(".ui-case-compiler/artifacts/run-1/trace.zip"),
         steps=[
             StepResult(
                 step_id="s1",
@@ -18,6 +19,7 @@ def test_html_reporter_renders_failed_step(tmp_path: Path) -> None:
                 status="failed",
                 duration_ms=12,
                 error="expected text",
+                screenshot=Path(".ui-case-compiler/artifacts/run-1/001-s1.png"),
             )
         ],
     )
@@ -26,5 +28,8 @@ def test_html_reporter_renders_failed_step(tmp_path: Path) -> None:
 
     assert report_path.exists()
     assert result.report_path == report_path
-    assert "expected text" in report_path.read_text(encoding="utf-8")
-
+    html = report_path.read_text(encoding="utf-8")
+    assert "expected text" in html
+    assert '/api/runs/run-1/artifacts/trace' in html
+    assert '/api/runs/run-1/steps/s1/screenshot' in html
+    assert ".ui-case-compiler/artifacts/run-1/trace.zip" not in html

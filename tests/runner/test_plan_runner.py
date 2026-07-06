@@ -67,6 +67,112 @@ def _plan(page: Path, expected: str = "欢迎回来") -> ExecutablePlan:
     )
 
 
+def _rich_search_page(path: Path) -> None:
+    path.write_text(
+        """
+        <!doctype html>
+        <html lang="en">
+          <body>
+            <input
+              id="kw"
+              readonly
+              style="width: 300px; height: 42px; border: 1px solid #999;"
+              onfocus="this.removeAttribute('readonly')"
+              value="default"
+            />
+            <button
+              id="su"
+              onclick="document.querySelector('#result').textContent =
+                document.querySelector('#kw').value"
+            >
+              Search
+            </button>
+            <div id="result"></div>
+          </body>
+        </html>
+        """,
+        encoding="utf-8",
+    )
+
+
+def _rich_search_plan(page: Path) -> ExecutablePlan:
+    return ExecutablePlan.model_validate(
+        {
+            "id": "plan-rich-search",
+            "name": "Rich Search",
+            "source": "manual",
+            "steps": [
+                {"id": "s1", "type": "navigate", "url": page.as_uri()},
+                {
+                    "id": "s2",
+                    "type": "fill",
+                    "target": _target("css", "#kw"),
+                    "value": "codex",
+                },
+                {"id": "s3", "type": "click", "target": _target("css", "#su")},
+                {
+                    "id": "s4",
+                    "type": "assert_text",
+                    "target": _target("css", "#result"),
+                    "expected": "codex",
+                },
+            ],
+        }
+    )
+
+
+def _enter_search_page(path: Path) -> None:
+    path.write_text(
+        """
+        <!doctype html>
+        <html lang="en">
+          <body>
+            <textarea
+              id="search"
+              onkeydown="if (event.key === 'Enter') {
+                event.preventDefault();
+                document.querySelector('#result').textContent = this.value;
+              }"
+            ></textarea>
+            <div id="result"></div>
+          </body>
+        </html>
+        """,
+        encoding="utf-8",
+    )
+
+
+def _enter_search_plan(page: Path) -> ExecutablePlan:
+    return ExecutablePlan.model_validate(
+        {
+            "id": "plan-enter-search",
+            "name": "Enter Search",
+            "source": "manual",
+            "steps": [
+                {"id": "s1", "type": "navigate", "url": page.as_uri()},
+                {
+                    "id": "s2",
+                    "type": "fill",
+                    "target": _target("css", "#search"),
+                    "value": "codex",
+                },
+                {
+                    "id": "s3",
+                    "type": "press",
+                    "target": _target("css", "#search"),
+                    "key": "Enter",
+                },
+                {
+                    "id": "s4",
+                    "type": "assert_text",
+                    "target": _target("css", "#result"),
+                    "expected": "codex",
+                },
+            ],
+        }
+    )
+
+
 @pytest.mark.asyncio
 async def test_plan_runner_executes_successful_plan(tmp_path: Path) -> None:
     page = tmp_path / "login.html"
@@ -97,3 +203,31 @@ async def test_plan_runner_records_failed_step_and_screenshot(tmp_path: Path) ->
     assert failed_step.error
     assert failed_step.screenshot is not None
     assert failed_step.screenshot.exists()
+
+
+@pytest.mark.asyncio
+async def test_plan_runner_fills_rich_input_after_click_fallback(tmp_path: Path) -> None:
+    page = tmp_path / "search.html"
+    _rich_search_page(page)
+
+    result = await PlanRunner(RuntimeConfig(output_dir=tmp_path / "out")).run(
+        _rich_search_plan(page),
+        RunOptions(),
+    )
+
+    assert result.status == "passed"
+    assert [step.status for step in result.steps] == ["passed"] * 4
+
+
+@pytest.mark.asyncio
+async def test_plan_runner_executes_press_step(tmp_path: Path) -> None:
+    page = tmp_path / "enter-search.html"
+    _enter_search_page(page)
+
+    result = await PlanRunner(RuntimeConfig(output_dir=tmp_path / "out")).run(
+        _enter_search_plan(page),
+        RunOptions(),
+    )
+
+    assert result.status == "passed"
+    assert [step.status for step in result.steps] == ["passed"] * 4

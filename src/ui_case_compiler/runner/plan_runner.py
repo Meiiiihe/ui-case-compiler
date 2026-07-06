@@ -8,6 +8,11 @@ from uuid import uuid4
 from playwright.async_api import Page, async_playwright
 from pydantic import BaseModel, ConfigDict, Field
 
+from ui_case_compiler.browser_profile import (
+    BROWSER_CONTEXT_OPTIONS,
+    STEALTH_INIT_SCRIPT,
+    browser_launch_args,
+)
 from ui_case_compiler.config import RuntimeConfig, load_config
 from ui_case_compiler.reporter.artifact_manager import ArtifactManager
 from ui_case_compiler.reporter.run_result import RunResult, StepResult
@@ -77,10 +82,13 @@ class PlanRunner:
         async with async_playwright() as playwright:
             browser_name = options.browser or self._config.browser
             browser_type = getattr(playwright, browser_name)
+            headless = self._config.headless if options.headless is None else options.headless
             browser = await browser_type.launch(
-                headless=self._config.headless if options.headless is None else options.headless
+                headless=headless,
+                args=browser_launch_args(browser_name),
             )
-            context = await browser.new_context()
+            context = await browser.new_context(**BROWSER_CONTEXT_OPTIONS)
+            await context.add_init_script(STEALTH_INIT_SCRIPT)
             if self._config.trace_enabled:
                 await context.tracing.start(screenshots=True, snapshots=True, sources=True)
             page = await context.new_page()

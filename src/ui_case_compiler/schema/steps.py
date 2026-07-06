@@ -76,6 +76,12 @@ class FillStep(BaseStep):
     value: str
 
 
+class PressStep(BaseStep):
+    type: Literal["press"] = "press"
+    target: StepTarget
+    key: str
+
+
 class SelectStep(BaseStep):
     type: Literal["select"] = "select"
     target: StepTarget
@@ -124,6 +130,7 @@ Step: TypeAlias = Annotated[
     NavigateStep
     | ClickStep
     | FillStep
+    | PressStep
     | SelectStep
     | CheckStep
     | HoverStep

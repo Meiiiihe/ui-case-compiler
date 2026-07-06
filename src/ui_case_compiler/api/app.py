@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from ui_case_compiler.api.routes import router
 from ui_case_compiler.api.service import ApiService, NotFoundError
 from ui_case_compiler.config import RuntimeConfig, load_config
+from ui_case_compiler.data.table_parser import DatasetParseError
 from ui_case_compiler.errors import (
     CompilationError,
     PlanValidationError,
@@ -49,6 +50,10 @@ def _register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RecordingError)
     async def _recording(request: Request, exc: RecordingError) -> JSONResponse:
+        return _json(400, str(exc))
+
+    @app.exception_handler(DatasetParseError)
+    async def _dataset(request: Request, exc: DatasetParseError) -> JSONResponse:
         return _json(400, str(exc))
 
     @app.exception_handler(StorageError)

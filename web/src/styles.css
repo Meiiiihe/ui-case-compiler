@@ -174,7 +174,8 @@ h2 {
 }
 
 .create-panel,
-.run-panel {
+.run-panel,
+.batch-panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -390,6 +391,11 @@ tbody tr {
   background: #edf6f3;
 }
 
+.selected-row {
+  background: #e3f2ee;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -469,6 +475,219 @@ tbody tr {
   overflow-wrap: anywhere;
 }
 
+.debug-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.debug-list,
+.debug-detail {
+  min-width: 0;
+}
+
+.debug-detail {
+  position: sticky;
+  top: 86px;
+  border: 1px solid rgba(32, 36, 44, 0.12);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.debug-detail-header,
+.debug-actions,
+.debug-facts,
+.locator-item,
+.locator-confidence {
+  display: flex;
+  gap: 10px;
+}
+
+.debug-detail-header {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.debug-actions {
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fffaf1;
+  color: var(--ink);
+  padding: 7px 11px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.link-button:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.debug-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.debug-facts > div {
+  border: 1px solid rgba(32, 36, 44, 0.1);
+  border-radius: 8px;
+  background: #fbf7ef;
+  padding: 10px;
+}
+
+.debug-facts dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.debug-facts dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.failure-box {
+  border: 1px solid rgba(180, 35, 24, 0.22);
+  border-radius: 8px;
+  background: #fff1ee;
+  margin-top: 16px;
+  padding: 12px;
+}
+
+.failure-box span,
+.debug-section h3 {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.failure-box pre,
+.json-block {
+  overflow: auto;
+  max-width: 100%;
+  border-radius: 6px;
+  background: #27241f;
+  color: #fff8e8;
+  padding: 12px;
+  font-family: "Cascadia Mono", "Consolas", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.debug-section {
+  margin-top: 18px;
+}
+
+.debug-section h3 {
+  margin: 0 0 10px;
+}
+
+.locator-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.locator-item,
+.locator-confidence {
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(32, 36, 44, 0.1);
+  border-radius: 8px;
+  background: #fbf7ef;
+  padding: 9px 10px;
+}
+
+.locator-item span,
+.locator-confidence span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.locator-item code {
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.failure-screenshot {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.step-select-button {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.step-select-button:hover:not(:disabled) {
+  transform: none;
+}
+
+.result-table td:nth-child(5) {
+  min-width: 280px;
+  max-width: 460px;
+  overflow-wrap: anywhere;
+}
+
+.batch-controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 120px auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.batch-concurrency input {
+  text-align: center;
+}
+
+.dataset-preview,
+.batch-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.batch-summary-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(29, 118, 111, 0.16);
+  border-radius: 8px;
+  background: #f3f8f5;
+  padding: 12px;
+}
+
+.batch-summary-line span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 @media (max-width: 760px) {
   .app-header,
   .page-title,
@@ -489,7 +708,14 @@ tbody tr {
 
   .form-grid,
   .meta-panel,
-  .metric-grid {
+  .metric-grid,
+  .debug-workbench,
+  .debug-facts,
+  .batch-controls {
     grid-template-columns: 1fr;
+  }
+
+  .debug-detail {
+    position: static;
   }
 }

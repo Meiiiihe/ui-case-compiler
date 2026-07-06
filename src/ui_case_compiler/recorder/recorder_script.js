@@ -137,6 +137,20 @@
     true
   );
   document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key !== "Enter") return;
+      const target = event.target;
+      if (!target || target.nodeType !== 1) return;
+      const tag = target.tagName.toLowerCase();
+      const role = roleOf(target);
+      if (tag === "input" || tag === "textarea" || role === "textbox") {
+        send("keypress", target, { value: "Enter" });
+      }
+    },
+    true
+  );
+  document.addEventListener(
     "change",
     (event) => send("change", event.target, { value: event.target.value }),
     true

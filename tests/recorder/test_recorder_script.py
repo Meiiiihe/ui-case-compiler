@@ -17,6 +17,10 @@ def _login_url() -> str:
 
 
 async def _collect_with(actions) -> list[dict]:
+    return await _collect_on_url(_login_url(), actions)
+
+
+async def _collect_on_url(url: str, actions) -> list[dict]:
     events: list[dict] = []
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
@@ -27,7 +31,7 @@ async def _collect_with(actions) -> list[dict]:
         )
         await context.add_init_script(script=_script())
         page = await context.new_page()
-        await page.goto(_login_url())
+        await page.goto(url)
         await actions(page)
         await page.wait_for_timeout(100)
         await browser.close()
@@ -74,3 +78,30 @@ async def test_element_always_has_xpath() -> None:
     element = [e for e in events if e["type"] == "click"][-1]["element"]
     assert element["xpath"]
     assert element["xpath"].startswith("/")
+
+
+@pytest.mark.asyncio
+async def test_enter_key_captures_keypress_event(tmp_path: Path) -> None:
+    page_path = tmp_path / "enter-search.html"
+    page_path.write_text(
+        """
+        <!doctype html>
+        <html>
+          <body>
+            <textarea id="search"></textarea>
+          </body>
+        </html>
+        """,
+        encoding="utf-8",
+    )
+
+    async def actions(page):
+        await page.fill("#search", "codex")
+        await page.press("#search", "Enter")
+
+    events = await _collect_on_url(page_path.resolve().as_uri(), actions)
+    keypresses = [e for e in events if e["type"] == "keypress"]
+
+    assert keypresses
+    assert keypresses[-1]["value"] == "Enter"
+    assert keypresses[-1]["element"]["css"] == "#search"

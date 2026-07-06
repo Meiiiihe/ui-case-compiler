@@ -4,7 +4,8 @@
   "source": "manual",
   "parameters": {
     "username": "demo@example.com",
-    "password": "secret"
+    "password": "secret",
+    "expectedText": "Welcome back"
   },
   "steps": [
     {
@@ -82,7 +83,7 @@
         ],
         "confidence": 0.8
       },
-      "expected": "Welcome back"
+      "expected": "${expectedText}"
     }
   ]
 }

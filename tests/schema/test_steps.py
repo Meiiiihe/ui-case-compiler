@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from ui_case_compiler.schema.steps import ClickStep, Locator, NavigateStep, WaitStep
+from ui_case_compiler.schema.steps import ClickStep, Locator, NavigateStep, PressStep, WaitStep
 
 
 def test_role_locator_requires_role() -> None:
@@ -28,3 +28,13 @@ def test_wait_step_has_upper_bound() -> None:
     with pytest.raises(ValidationError):
         WaitStep(id="step-1", duration_ms=60_001)
 
+
+def test_press_step_requires_key() -> None:
+    with pytest.raises(ValidationError):
+        PressStep.model_validate(
+            {
+                "id": "step-1",
+                "type": "press",
+                "target": {"primary": {"strategy": "css", "value": "#search"}},
+            }
+        )

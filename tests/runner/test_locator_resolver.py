@@ -1,7 +1,7 @@
 import pytest
 
 from ui_case_compiler.errors import StepExecutionError
-from ui_case_compiler.runner.locator_resolver import LocatorResolver
+from ui_case_compiler.runner.locator_resolver import LocatorPurpose, LocatorResolver
 from ui_case_compiler.schema.steps import Locator, StepTarget
 
 
@@ -9,19 +9,21 @@ class FakeLocator:
     def __init__(
         self,
         name: str,
-        count: int = 1,
+        count: int | list[int] = 1,
         visible: bool = True,
         enabled: bool = True,
         editable: bool = True,
     ) -> None:
         self.name = name
-        self._count = count
+        self._counts = count if isinstance(count, list) else [count]
         self._visible = visible
         self._enabled = enabled
         self._editable = editable
 
     async def count(self) -> int:
-        return self._count
+        if len(self._counts) > 1:
+            return self._counts.pop(0)
+        return self._counts[0]
 
     def nth(self, index: int) -> "FakeLocator":
         return FakeLocator(
@@ -45,12 +47,14 @@ class FakeLocator:
 class FakePage:
     def __init__(
         self,
-        counts: dict[str, int] | None = None,
+        counts: dict[str, int | list[int]] | None = None,
         visible: dict[str, bool] | None = None,
+        url: str = "about:blank",
     ) -> None:
         self.calls: list[str] = []
         self.counts = counts or {}
         self.visible = visible or {}
+        self.url = url
 
     def _make(self, key: str) -> FakeLocator:
         self.calls.append(key)
@@ -97,7 +101,7 @@ async def test_fallback_used_when_primary_matches_zero() -> None:
         fallbacks=[Locator(strategy="text", value="提交")],
     )
 
-    locator = await LocatorResolver().resolve(page, target)
+    locator = await LocatorResolver(wait_timeout_ms=0).resolve(page, target)
 
     assert locator.name == "text:提交"
     assert page.calls == ["role:button:提交", "text:提交"]
@@ -114,7 +118,7 @@ async def test_fallback_used_when_primary_is_hidden_for_input() -> None:
         fallbacks=[Locator(strategy="label", value="搜索")],
     )
 
-    locator = await LocatorResolver().resolve(page, target)
+    locator = await LocatorResolver(wait_timeout_ms=0).resolve(page, target)
 
     assert locator.name == "label:搜索"
     assert page.calls == ["locator:#kw", "label:搜索"]
@@ -129,4 +133,68 @@ async def test_all_candidates_failed() -> None:
     )
 
     with pytest.raises(StepExecutionError, match="Unable to resolve locator"):
-        await LocatorResolver().resolve(page, target)
+        await LocatorResolver(wait_timeout_ms=0).resolve(page, target)
+
+
+@pytest.mark.asyncio
+async def test_waits_until_dynamic_locator_appears() -> None:
+    page = FakePage({"locator:#kw:visible": [0, 0, 1]})
+    target = StepTarget(primary=Locator(strategy="css", value="#kw:visible"))
+
+    locator = await LocatorResolver(wait_timeout_ms=100, poll_interval_ms=1).resolve(page, target)
+
+    assert locator.name == "locator:#kw:visible"
+    assert page.calls == ["locator:#kw:visible"]
+
+
+@pytest.mark.asyncio
+async def test_resolve_existing_returns_locator_without_readiness_checks() -> None:
+    page = FakePage(
+        {"locator:#kw": 1},
+        visible={"locator:#kw": False},
+    )
+    target = StepTarget(primary=Locator(strategy="css", value="#kw"))
+
+    locator = await LocatorResolver(wait_timeout_ms=0).resolve_existing(page, target)
+
+    assert locator.name == "locator:#kw"
+
+
+@pytest.mark.asyncio
+async def test_baidu_legacy_kw_visible_uses_smart_search_input() -> None:
+    page = FakePage(
+        {
+            "locator:#kw:visible": 0,
+            "locator:#chat-textarea": 1,
+        },
+        url="https://www.baidu.com/",
+    )
+    target = StepTarget(primary=Locator(strategy="css", value="#kw:visible"))
+
+    locator = await LocatorResolver(wait_timeout_ms=0).resolve(
+        page,
+        target,
+        LocatorPurpose.INPUT,
+    )
+
+    assert locator.name == "locator:#chat-textarea"
+
+
+@pytest.mark.asyncio
+async def test_baidu_legacy_submit_uses_smart_submit_button() -> None:
+    page = FakePage(
+        {
+            "locator:#su:visible": 0,
+            "locator:#chat-submit-button": 1,
+        },
+        url="https://www.baidu.com/",
+    )
+    target = StepTarget(primary=Locator(strategy="css", value="#su:visible"))
+
+    locator = await LocatorResolver(wait_timeout_ms=0).resolve(
+        page,
+        target,
+        LocatorPurpose.ACTION,
+    )
+
+    assert locator.name == "locator:#chat-submit-button"

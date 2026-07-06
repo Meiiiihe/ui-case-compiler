@@ -10,6 +10,7 @@ from ui_case_compiler.schema.steps import (
     FillStep,
     HoverStep,
     NavigateStep,
+    PressStep,
     SelectStep,
     Step,
     WaitStep,
@@ -27,20 +28,15 @@ class ActionExecutor:
             await page.goto(step.url)
             return
         if isinstance(step, ClickStep):
-            locator = await self._locator_resolver.resolve(
-                page,
-                step.target,
-                LocatorPurpose.ACTION,
-            )
-            await locator.click()
+            await self._click(page, step)
             return
         if isinstance(step, FillStep):
-            locator = await self._locator_resolver.resolve(
-                page,
-                step.target,
-                LocatorPurpose.INPUT,
-            )
-            await locator.fill(step.value)
+            await self._fill(page, step)
+            return
+        if isinstance(step, PressStep):
+            locator = await self._locator_resolver.resolve_existing(page, step.target)
+            await locator.focus()
+            await page.keyboard.press(step.key)
             return
         if isinstance(step, SelectStep):
             locator = await self._locator_resolver.resolve(
@@ -73,3 +69,48 @@ class ActionExecutor:
 
         msg = f"Step '{step.type}' is not an action step"
         raise StepExecutionError(msg)
+
+    async def _fill(self, page: Page, step: FillStep) -> None:
+        primary_error: Exception | None = None
+        try:
+            locator = await self._locator_resolver.resolve(
+                page,
+                step.target,
+                LocatorPurpose.INPUT,
+            )
+            await locator.fill(step.value)
+            return
+        except Exception as exc:
+            primary_error = exc
+
+        try:
+            locator = await self._locator_resolver.resolve_existing(page, step.target)
+            await locator.focus()
+            await page.keyboard.press("Control+A")
+            await page.keyboard.press("Backspace")
+            await locator.type(step.value, delay=50)
+            return
+        except Exception as exc:
+            msg = f"{primary_error}; keyboard type fallback failed after focusing target: {exc}"
+            raise StepExecutionError(msg) from exc
+
+    async def _click(self, page: Page, step: ClickStep) -> None:
+        primary_error: Exception | None = None
+        try:
+            locator = await self._locator_resolver.resolve(
+                page,
+                step.target,
+                LocatorPurpose.ACTION,
+            )
+            await locator.click()
+            return
+        except Exception as exc:
+            primary_error = exc
+
+        try:
+            locator = await self._locator_resolver.resolve_existing(page, step.target)
+            await locator.click(force=True)
+            return
+        except Exception as exc:
+            msg = f"{primary_error}; force click fallback failed: {exc}"
+            raise StepExecutionError(msg) from exc

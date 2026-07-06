@@ -14,6 +14,7 @@ from ui_case_compiler.schema.steps import (
     ClickStep,
     FillStep,
     NavigateStep,
+    PressStep,
     SelectStep,
     Step,
     StepTarget,
@@ -40,7 +41,7 @@ class RecordedEvent(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    type: Literal["click", "input", "change", "navigation", "mousemove"]
+    type: Literal["click", "input", "change", "keypress", "navigation", "mousemove"]
     timestamp: int = Field(ge=0)
     value: str | None = None
     url: str | None = None
@@ -78,6 +79,14 @@ class RecordingCompiler:
                 )
             elif event.type == "change":
                 steps.append(self._change_step(event, step_id))
+            elif event.type == "keypress":
+                steps.append(
+                    PressStep(
+                        id=step_id,
+                        target=self._target_for(event),
+                        key=self._value_for(event),
+                    )
+                )
 
         if not steps:
             msg = "Recorded event stream contains no executable events"

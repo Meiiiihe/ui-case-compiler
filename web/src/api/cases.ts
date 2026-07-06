@@ -1,8 +1,12 @@
 import { apiFetch } from "./client";
 import type {
+  BatchRunRequest,
+  BatchRunResult,
   CaseSummary,
   CompileNlRequest,
   CompileRecordingRequest,
+  DatasetPreviewRequest,
+  DatasetPreviewResponse,
   ExecutablePlan,
   RecordingSession,
   RunRequest,
@@ -42,6 +46,13 @@ export function stopRecording(sessionId: string): Promise<ExecutablePlan> {
   });
 }
 
+export function previewDataset(req: DatasetPreviewRequest): Promise<DatasetPreviewResponse> {
+  return apiFetch<DatasetPreviewResponse>("/datasets/preview", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
 export function getCase(id: string): Promise<ExecutablePlan> {
   return apiFetch<ExecutablePlan>(`/cases/${id}`);
 }
@@ -66,6 +77,13 @@ export function dryRun(id: string, req: RunRequest): Promise<RunResult> {
 
 export function runCase(id: string, req: RunRequest): Promise<RunResult> {
   return apiFetch<RunResult>(`/cases/${id}/run`, {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export function batchRunCase(id: string, req: BatchRunRequest): Promise<BatchRunResult> {
+  return apiFetch<BatchRunResult>(`/cases/${id}/batch-run`, {
     method: "POST",
     body: JSON.stringify(req),
   });

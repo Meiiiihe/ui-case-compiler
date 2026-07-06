@@ -1,0 +1,75 @@
+{
+  "id": "baidu-search-example",
+  "name": "Baidu Search Example",
+  "source": "manual",
+  "base_url": "https://www.baidu.com/",
+  "parameters": {
+    "keyword": "王俊凯"
+  },
+  "environment": null,
+  "steps": [
+    {
+      "id": "step-001",
+      "type": "navigate",
+      "url": "https://www.baidu.com/"
+    },
+    {
+      "id": "step-002",
+      "type": "fill",
+      "target": {
+        "primary": {
+          "strategy": "css",
+          "value": "#kw"
+        },
+        "fallbacks": [
+          {
+            "strategy": "role",
+            "role": "textbox",
+            "name": "搜索"
+          },
+          {
+            "strategy": "placeholder",
+            "value": "请输入关键词"
+          }
+        ],
+        "confidence": 0.9
+      },
+      "value": "${keyword}"
+    },
+    {
+      "id": "step-003",
+      "type": "click",
+      "target": {
+        "primary": {
+          "strategy": "css",
+          "value": "#su"
+        },
+        "fallbacks": [
+          {
+            "strategy": "role",
+            "role": "button",
+            "name": "百度一下"
+          },
+          {
+            "strategy": "text",
+            "value": "百度一下"
+          }
+        ],
+        "confidence": 0.9
+      }
+    },
+    {
+      "id": "step-004",
+      "type": "assert_text",
+      "target": {
+        "primary": {
+          "strategy": "css",
+          "value": "body"
+        },
+        "fallbacks": [],
+        "confidence": 0.7
+      },
+      "expected": "${keyword}"
+    }
+  ]
+}

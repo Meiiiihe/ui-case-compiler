@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { dryRun, getCase, runCase, validateCase } from "../api/cases";
+import { BatchRunPanel } from "../components/BatchRunPanel";
 import { ErrorBanner } from "../components/ErrorBanner";
 import { Spinner } from "../components/Spinner";
 import { StepList } from "../components/StepList";
@@ -25,20 +26,20 @@ export function CaseDetailPage() {
   const action = useAsync<RunResult | ValidateResponse>();
   const [paramsText, setParamsText] = useState("");
   const [validateMsg, setValidateMsg] = useState<string | null>(null);
-  const planRun = plan.run;
 
   useEffect(() => {
-    if (caseId) void planRun(() => getCase(caseId));
-  }, [caseId, planRun]);
+    if (caseId) void plan.run(() => getCase(caseId));
+  }, [caseId, plan.run]);
 
   if (!caseId) return null;
 
+  const currentCaseId = caseId;
   const runReq = { params: parseParams(paramsText), headed: false };
 
   async function doValidate() {
     setValidateMsg(null);
     await action.run(async () => {
-      const resp = await validateCase(caseId!);
+      const resp = await validateCase(currentCaseId);
       setValidateMsg(resp.valid ? `校验通过（${resp.step_count} 步）` : "校验失败");
       return resp;
     });
@@ -47,39 +48,39 @@ export function CaseDetailPage() {
   async function doRun(kind: "run" | "dry") {
     await action.run(async () => {
       const result =
-        kind === "run" ? await runCase(caseId!, runReq) : await dryRun(caseId!, runReq);
+        kind === "run" ? await runCase(currentCaseId, runReq) : await dryRun(currentCaseId, runReq);
       navigate(`/runs/${result.run_id}`);
       return result;
     });
   }
 
-  const p = plan.data;
+  const currentPlan = plan.data;
 
   return (
     <div className="page-stack">
       <ErrorBanner message={plan.error ?? action.error} />
       <Spinner show={plan.loading} />
-      {p && (
+      {currentPlan && (
         <>
           <div className="page-title">
             <div>
               <p className="eyebrow">Case Detail</p>
-              <h1>{p.name}</h1>
+              <h1>{currentPlan.name}</h1>
             </div>
-            <span className="source-badge">{p.source}</span>
+            <span className="source-badge">{currentPlan.source}</span>
           </div>
           <section className="panel meta-panel">
             <div>
               <span className="meta-label">计划 ID</span>
-              <code>{p.id}</code>
+              <code>{currentPlan.id}</code>
             </div>
             <div>
               <span className="meta-label">Base URL</span>
-              <span>{p.base_url ?? "未设置"}</span>
+              <span>{currentPlan.base_url ?? "未设置"}</span>
             </div>
             <div>
               <span className="meta-label">步骤数</span>
-              <strong>{p.steps.length}</strong>
+              <strong>{currentPlan.steps.length}</strong>
             </div>
           </section>
           <section className="panel">
@@ -89,13 +90,13 @@ export function CaseDetailPage() {
                 <h2>步骤明细</h2>
               </div>
             </div>
-            <StepList steps={p.steps} />
+            <StepList steps={currentPlan.steps} />
           </section>
           <section className="panel run-panel">
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Run Control</p>
-                <h2>运行控制</h2>
+                <h2>单次运行</h2>
               </div>
               <span className="hint">每行一个 key=value</span>
             </div>
@@ -104,7 +105,7 @@ export function CaseDetailPage() {
               <textarea
                 aria-label="运行参数"
                 value={paramsText}
-                onChange={(e) => setParamsText(e.target.value)}
+                onChange={(event) => setParamsText(event.target.value)}
                 rows={4}
                 spellCheck={false}
                 placeholder="loginPageUrl=file:///F:/.../login.html&#10;username=demo@example.com"
@@ -123,6 +124,7 @@ export function CaseDetailPage() {
             </div>
             {validateMsg && <p className="success-note">{validateMsg}</p>}
           </section>
+          <BatchRunPanel caseId={currentCaseId} />
         </>
       )}
     </div>

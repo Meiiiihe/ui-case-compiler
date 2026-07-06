@@ -1,0 +1,3 @@
+loginPageUrl,username,password,expectedText
+file:///F:/ui-auto-test/ui_case_compiler/examples/pages/login.html,demo@example.com,secret,Welcome back
+file:///F:/ui-auto-test/ui_case_compiler/examples/pages/login.html,student@example.com,secret,Welcome back

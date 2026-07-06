@@ -2,6 +2,7 @@ import pytest
 
 from ui_case_compiler.errors import RecordingError
 from ui_case_compiler.recorder import RecordedElement, RecordedEvent, RecordingCompiler
+from ui_case_compiler.schema.steps import NavigateStep
 
 
 def test_compiles_login_event_stream_to_fill_and_click_steps() -> None:
@@ -57,6 +58,115 @@ def test_ignores_mousemove_and_merges_consecutive_input_events() -> None:
     assert len(plan.steps) == 1
     assert plan.steps[0].type == "fill"
     assert plan.steps[0].value == "test"  # type: ignore[union-attr]
+
+
+def test_merges_input_events_with_same_css_even_when_xpath_changes() -> None:
+    compiler = RecordingCompiler()
+    events = [
+        RecordedEvent(
+            type="input",
+            timestamp=1,
+            value="w",
+            element=RecordedElement(tag="textarea", role="textbox", css="#chat-textarea"),
+        ),
+        RecordedEvent(
+            type="input",
+            timestamp=2,
+            value="wang",
+            element=RecordedElement(
+                tag="textarea",
+                role="textbox",
+                css="#chat-textarea",
+                xpath="/html/body/div[1]/textarea[1]",
+            ),
+        ),
+        RecordedEvent(
+            type="input",
+            timestamp=3,
+            value="wang",
+            element=RecordedElement(
+                tag="textarea",
+                role="textbox",
+                css="#chat-textarea",
+                xpath="/html/body/div[2]/textarea[1]",
+            ),
+        ),
+    ]
+
+    plan = compiler.compile(events, "Search")
+
+    assert len(plan.steps) == 1
+    assert plan.steps[0].type == "fill"
+    assert plan.steps[0].value == "wang"  # type: ignore[union-attr]
+
+
+def test_merges_text_input_and_change_events_with_same_value() -> None:
+    compiler = RecordingCompiler()
+    element = RecordedElement(tag="textarea", role="textbox", css="#chat-textarea")
+    events = [
+        RecordedEvent(type="input", timestamp=1, value="王俊凯", element=element),
+        RecordedEvent(type="change", timestamp=2, value="王俊凯", element=element),
+    ]
+
+    plan = compiler.compile(events, "Search")
+
+    assert len(plan.steps) == 1
+    assert plan.steps[0].type == "fill"
+    assert plan.steps[0].value == "王俊凯"  # type: ignore[union-attr]
+
+
+def test_keypress_event_compiles_to_press_step() -> None:
+    compiler = RecordingCompiler()
+    element = RecordedElement(tag="textarea", role="textbox", css="#chat-textarea")
+    events = [
+        RecordedEvent(type="input", timestamp=1, value="王俊凯", element=element),
+        RecordedEvent(type="keypress", timestamp=2, value="Enter", element=element),
+        RecordedEvent(type="navigation", timestamp=3, url="https://www.baidu.com/s?wd=wang"),
+    ]
+
+    plan = compiler.compile(events, "Search")
+
+    assert [step.type for step in plan.steps] == ["fill", "press", "navigate"]
+    assert plan.steps[0].value == "王俊凯"  # type: ignore[union-attr]
+    assert plan.steps[1].key == "Enter"  # type: ignore[union-attr]
+
+
+def test_filters_captcha_navigation_and_interactions_from_recording() -> None:
+    compiler = RecordingCompiler()
+    input_element = RecordedElement(tag="textarea", role="textbox", css="#chat-textarea")
+    captcha_element = RecordedElement(
+        tag="div",
+        css="#spin-0 > div:nth-of-type(2)",
+        xpath="/html/body/div[3]/div[2]",
+    )
+    events = [
+        RecordedEvent(type="navigation", timestamp=1, url="https://www.baidu.com/"),
+        RecordedEvent(type="input", timestamp=2, value="wang", element=input_element),
+        RecordedEvent(
+            type="navigation",
+            timestamp=3,
+            url="https://www.baidu.com/s?wd=wang",
+        ),
+        RecordedEvent(
+            type="navigation",
+            timestamp=4,
+            url="https://wappass.baidu.com/static/captcha/tuxing_v2.html?backurl=...",
+        ),
+        RecordedEvent(type="click", timestamp=5, element=captcha_element),
+        RecordedEvent(type="click", timestamp=6, element=captcha_element),
+        RecordedEvent(
+            type="navigation",
+            timestamp=7,
+            url="https://www.baidu.com/s?wd=wang&rsv_jmp=fail&p_tk=dynamic",
+        ),
+    ]
+
+    plan = compiler.compile(events, "Baidu Search")
+
+    assert [step.type for step in plan.steps] == ["navigate", "fill", "navigate"]
+    navigation_urls = [step.url for step in plan.steps if isinstance(step, NavigateStep)]
+    assert all("wappass.baidu.com" not in url for url in navigation_urls)
+    assert all("rsv_jmp=fail" not in url for url in navigation_urls)
 
 
 def test_change_event_uses_select_for_select_element() -> None:
