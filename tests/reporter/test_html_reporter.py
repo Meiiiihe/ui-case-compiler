@@ -31,5 +31,7 @@ def test_html_reporter_renders_failed_step(tmp_path: Path) -> None:
     html = report_path.read_text(encoding="utf-8")
     assert "expected text" in html
     assert '/api/runs/run-1/artifacts/trace' in html
+    assert "Download trace.zip" in html
     assert '/api/runs/run-1/steps/s1/screenshot' in html
+    assert "View screenshot" in html
     assert ".ui-case-compiler/artifacts/run-1/trace.zip" not in html

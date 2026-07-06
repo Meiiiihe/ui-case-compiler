@@ -32,6 +32,9 @@
       font-weight: 700;
       color: #047857;
     }
+    [role="status"].error {
+      color: #b91c1c;
+    }
   </style>
 </head>
 <body>
@@ -53,7 +56,13 @@
   <script>
     document.getElementById("login-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      document.getElementById("message").textContent = "Welcome back";
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
+      const valid = username === "demo@example.com" && password === "secret";
+
+      message.textContent = valid ? "Welcome back" : "Invalid credentials";
+      message.className = valid ? "" : "error";
     });
   </script>
 </body>

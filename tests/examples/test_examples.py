@@ -42,5 +42,26 @@ async def test_example_plan_runs_against_local_page(tmp_path) -> None:
     assert result.status == "passed"
 
 
+@pytest.mark.asyncio
+async def test_example_plan_supports_failed_login_message(tmp_path) -> None:
+    plan = load_plan(_project_root() / "examples" / "plans" / "login.json")
+    login_page_url = (_project_root() / "examples" / "pages" / "login.html").resolve().as_uri()
+
+    result = await PlanRunner(RuntimeConfig(output_dir=tmp_path)).run(
+        plan,
+        RunOptions(
+            output_dir=tmp_path,
+            runtime_params={
+                "loginPageUrl": login_page_url,
+                "username": "wrong@example.com",
+                "password": "bad",
+                "expectedText": "Invalid credentials",
+            },
+        ),
+    )
+
+    assert result.status == "passed"
+
+
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]

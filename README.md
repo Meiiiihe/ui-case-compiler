@@ -301,30 +301,3 @@ ruff: passed
 mypy: passed
 frontend build: passed
 ```
-
-## 面试讲解建议
-
-可以按这条线讲：
-
-```text
-传统 UI 自动化脚本门槛高
--> 用自然语言/录制降低创建用例成本
--> 编译成结构化 DSL
--> 回归时直接执行 DSL，不每一步调用模型
--> 失败时保存截图、trace、报告和 locator
--> 前端把失败结果变成可定位、可调试的工作台
-```
-
-简历表达可以参考：
-
-```text
-智能 UI 自动化测试平台 | Python / Playwright / FastAPI / React
-
-- 设计自然语言和录制操作到结构化 DSL 的编译流程，降低手写 UI 自动化脚本成本。
-- 基于 Playwright Python 实现执行引擎，支持参数化、locator fallback、失败截图、trace 和 HTML 报告。
-- 开发 React 运行结果调试页，支持失败步骤定位、截图预览、Trace 下载和原始 DSL 查看。
-- 针对富输入框场景优化 fill 行为，增加点击后键盘输入兜底，提高复杂页面执行稳定性。
-- 使用 pytest、ruff、mypy 和前端单测进行质量保障。
-```
-
-更多演示步骤见 [docs/demo-guide.md](docs/demo-guide.md)。

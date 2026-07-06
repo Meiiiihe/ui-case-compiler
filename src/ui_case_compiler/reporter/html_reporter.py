@@ -29,7 +29,7 @@ REPORT_TEMPLATE = """<!doctype html>
   <p>Started: {{ result.started_at }}</p>
   <p>Ended: {{ result.ended_at }}</p>
   {% if result.trace_path %}
-  <p>Trace: <a href="/api/runs/{{ result.run_id }}/artifacts/trace">下载 trace.zip</a></p>
+  <p>Trace: <a href="/api/runs/{{ result.run_id }}/artifacts/trace">Download trace.zip</a></p>
   {% endif %}
   <table>
     <thead>
@@ -52,7 +52,9 @@ REPORT_TEMPLATE = """<!doctype html>
         <td>{{ step.error or "" }}</td>
         <td>
           {% if step.screenshot %}
-          <a href="/api/runs/{{ result.run_id }}/steps/{{ step.step_id }}/screenshot">查看截图</a>
+          <a
+            href="/api/runs/{{ result.run_id }}/steps/{{ step.step_id }}/screenshot"
+          >View screenshot</a>
           {% endif %}
         </td>
       </tr>
