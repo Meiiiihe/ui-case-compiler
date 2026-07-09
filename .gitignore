@@ -10,3 +10,7 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+
+# Local-only learning/interview notes
+docs/context-aware-compiler-resume.md
+benchmarks/context-aware/README.md
