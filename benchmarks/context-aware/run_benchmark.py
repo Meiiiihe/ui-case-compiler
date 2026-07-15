@@ -160,6 +160,12 @@ async def main() -> None:
         "benchmark": dataset["name"],
         "dataset_version": dataset.get("version"),
         "total_cases": len(cases),
+        "targets": {
+            "status": "unverified",
+            "locator_unique_rate": "68% -> 87%",
+            "e2e_pass_rate": "54% -> 76%",
+            "note": "这些数字是待验证目标，不是实际运行结果。",
+        },
         "run_config": {
             "provider": args.provider,
             "model": config.llm.model if args.provider == "deepseek" else None,

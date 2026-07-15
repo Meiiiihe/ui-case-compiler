@@ -1,6 +1,11 @@
 # Context-Aware 中文 UI 用例评测集
 
-本目录用于比较 Baseline 与 Context-Aware 两种编译策略在同一批中文 UI 用例上的表现。正式结果仅以 `run_benchmark.py` 生成的 `results/summary.json` 为准；未生成并提交带运行配置的结果前，不声明具体提升幅度。
+本目录用于比较 Baseline 与 Context-Aware 两种编译策略在同一批中文 UI 用例上的表现。当前评测目标如下：
+
+- Locator 唯一匹配率：`68% -> 87%`
+- 端到端通过率：`54% -> 76%`
+
+以上数字是待验证目标，不是已经取得的实验结果。正式结果仅以 `run_benchmark.py` 生成的 `results/summary.json` 为准。
 
 ## 数据集
 
