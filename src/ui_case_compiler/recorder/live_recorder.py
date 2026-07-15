@@ -29,9 +29,12 @@ class LiveRecorder:
         self,
         config: RuntimeConfig | None = None,
         wait_for_stop: WaitForStop | None = None,
+        *,
+        headless: bool = False,
     ) -> None:
         self._config = config or load_config()
         self._wait_for_stop = wait_for_stop or self._default_wait_for_stop
+        self._headless = headless
         self._collector = EventCollector()
 
     async def record(self, url: str) -> list[RecordedEvent]:
@@ -40,7 +43,7 @@ class LiveRecorder:
 
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(
-                headless=False,
+                headless=self._headless,
                 args=browser_launch_args("chromium"),
             )
             context = await browser.new_context(**BROWSER_CONTEXT_OPTIONS)

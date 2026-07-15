@@ -29,7 +29,7 @@ async def test_record_collects_navigation_and_interactions() -> None:
         await page.fill("#password", "secret")
         await page.click("button[type=submit]")
 
-    recorder = LiveRecorder(wait_for_stop=_driver_stop(drive))
+    recorder = LiveRecorder(wait_for_stop=_driver_stop(drive), headless=True)
     events = await recorder.record(_login_url())
 
     assert all(isinstance(e, RecordedEvent) for e in events)
@@ -45,7 +45,7 @@ async def test_recorded_events_compile_to_plan() -> None:
         await page.fill("#username", "alice")
         await page.click("button[type=submit]")
 
-    recorder = LiveRecorder(wait_for_stop=_driver_stop(drive))
+    recorder = LiveRecorder(wait_for_stop=_driver_stop(drive), headless=True)
     events = await recorder.record(_login_url())
     plan = RecordingCompiler().compile(events, "Recorded Login")
 
