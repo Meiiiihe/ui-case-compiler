@@ -1,18 +1,22 @@
 # UI Case Compiler
 
-UI Case Compiler 是一个本地 UI 自动化测试学习项目，目标是把“自然语言用例”和“用户录制操作”编译成稳定可重复执行的测试计划，降低直接手写 Selenium / Playwright 脚本的门槛。
+UI Case Compiler 是一个面向本地运行的 UI 自动化测试项目，将自然语言用例和用户录制操作转换为结构化 `ExecutablePlan`，并由 Playwright 执行。
 
 项目核心使用 Python + Playwright 执行测试，后端使用 FastAPI，前端使用 React + TypeScript + Vite。
 
-## 适合展示的亮点
+## 核心能力
 
 - 自然语言测试描述可以编译为结构化 `ExecutablePlan`。
-- 录制一次页面操作，可以生成 `navigate / click / fill / assert` 等标准步骤。
-- 执行阶段不需要每一步都调用大模型，回归执行更稳定、成本更低。
+- 录制一次页面操作，可以生成 `navigate / click / fill / select / check / press` 等标准步骤。
+- 模型仅参与自然语言用例编译；生成的 `ExecutablePlan` 在执行阶段由 Playwright 直接运行，无需逐步骤调用模型。
 - 支持 locator fallback、参数化、失败截图、Playwright trace、HTML 报告。
 - Web 控制台可以查看用例、试运行、正式运行、批量数据驱动和失败调试。
 - 失败步骤可以定位到截图、错误信息、原始 DSL、主 locator 和备用 locator。
 - 针对百度这类富输入框场景，`fill` 失败后会自动尝试点击后键盘输入兜底。
+
+## 可复现评测
+
+仓库提供 Baseline 与 Context-Aware 编译策略的对照评测脚本，使用相同的中文 UI 用例统计 DSL 合法率、Locator 唯一命中率和端到端通过率。数据集、指标定义和运行方式见 [Context-Aware 评测说明](benchmarks/context-aware/README.md)。未发布真实运行结果前，项目不声明具体提升幅度。
 
 ## 项目结构
 
@@ -45,14 +49,15 @@ ui_case_compiler/
 | 浏览器自动化 | Playwright Chromium |
 | 操作系统 | Windows / macOS / Linux |
 
-下面命令以 Windows PowerShell 为例。
+下面命令以 Windows PowerShell 为例，并默认从仓库根目录开始执行。
 
 ## 安装依赖
 
-进入项目目录：
+克隆并进入项目目录：
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler
+git clone https://github.com/Meiiiihe/ui-case-compiler.git
+cd ui-case-compiler
 ```
 
 创建并激活 Python 虚拟环境：
@@ -80,7 +85,7 @@ python -m playwright install chromium
 安装前端依赖：
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler\web
+cd web
 npm.cmd install
 ```
 
@@ -91,7 +96,6 @@ PowerShell 里建议使用 `npm.cmd`，避免 `npm.ps1` 执行策略问题。
 终端 1：启动后端 API。
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler
 .\.venv\Scripts\Activate.ps1
 ui-case serve
 ```
@@ -105,7 +109,7 @@ http://127.0.0.1:8000
 终端 2：启动前端。
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler\web
+cd web
 npm.cmd run dev -- --host 127.0.0.1 --port 5173
 ```
 
@@ -124,7 +128,6 @@ http://127.0.0.1:5173/
 生成本地页面 URL：
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler
 $PAGE_URL = python -c "from pathlib import Path; print(Path('examples/pages/login.html').resolve().as_uri())"
 $PAGE_URL
 ```
@@ -277,7 +280,6 @@ file:///F:/ui-auto-test/ui_case_compiler/examples/pages/login.html,wrong@example
 后端：
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler
 .\.venv\Scripts\Activate.ps1
 python -m pytest
 python -m ruff check src tests
@@ -287,17 +289,9 @@ python -m mypy src
 前端：
 
 ```powershell
-cd F:\ui-auto-test\ui_case_compiler\web
+cd web
 npm.cmd test
 npm.cmd run build
 ```
 
-当前验证结果：
-
-```text
-pytest: 95 passed
-frontend test: 22 passed
-ruff: passed
-mypy: passed
-frontend build: passed
-```
+GitHub Actions 会在每次 push 和 pull request 时运行后端质量检查、测试及示例 UI 用例，具体配置见 [`.github/workflows/ui-case.yml`](.github/workflows/ui-case.yml)。

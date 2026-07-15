@@ -7,7 +7,7 @@ from openai import AsyncOpenAI
 from ui_case_compiler.config import LLMConfig
 from ui_case_compiler.errors import CompilationError
 
-_JSON_HINT = "Return the result as a JSON object."
+_JSON_HINT = "请返回一个 JSON 对象。"
 _FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL)
 
 
@@ -16,7 +16,7 @@ class DeepSeekProvider:
 
     def __init__(self, config: LLMConfig) -> None:
         if not config.api_key:
-            msg = "未配置模型 API key，无法编译"
+            msg = "未配置模型 API key，无法编译自然语言用例"
             raise CompilationError(msg)
         self._model = config.model
         self._client = AsyncOpenAI(

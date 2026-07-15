@@ -42,7 +42,8 @@ def test_prompt_includes_worked_example() -> None:
     prompt = PromptBuilder().build("Click Login", _context())
 
     assert '"id": "login-flow"' in prompt
-    assert '"expected": "Welcome back"' in prompt
+    assert '"expected": "欢迎回来"' in prompt
+    assert "打开登录页面" in prompt
 
 
 def test_empty_case_text_raises() -> None:

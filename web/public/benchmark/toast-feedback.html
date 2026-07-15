@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Toast 提示页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;background:#f7f9fb;color:#17202a}
+    main{max-width:760px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    button{font-size:16px;padding:8px 10px;border:0;border-radius:4px;background:#1f6feb;color:white;margin:8px 8px 0 0}
+    .secondary{background:#6b7280}.toast{margin-top:18px;padding:12px;border-radius:6px;background:#e7f5ff;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Toast 提示页面</h1>
+  <button id="save-button" data-testid="save-button" type="button">保存</button>
+  <button id="publish-button" data-testid="publish-button" type="button">发布</button>
+  <button id="copy-button" data-testid="copy-button" type="button">复制链接</button>
+  <button id="undo-button" data-testid="undo-button" type="button" class="secondary">撤销</button>
+  <div id="toast" data-testid="toast-message" role="status" class="toast">等待操作</div>
+</main>
+<script>
+  const toast = document.querySelector("#toast");
+  document.querySelector("#save-button").addEventListener("click", () => { toast.textContent = "保存成功"; });
+  document.querySelector("#publish-button").addEventListener("click", () => { toast.textContent = "发布成功"; });
+  document.querySelector("#copy-button").addEventListener("click", () => { toast.textContent = "复制成功"; });
+  document.querySelector("#undo-button").addEventListener("click", () => { toast.textContent = "撤销成功"; });
+</script>
+</body>
+</html>

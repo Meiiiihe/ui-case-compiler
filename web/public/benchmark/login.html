@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>登录页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;color:#17202a;background:#f7f9fb}
+    main{max-width:720px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    label{display:block;margin:12px 0 6px;font-weight:600} input,select,button{font-size:16px;padding:8px 10px}
+    input[type=text],input[type=password],input[type=email],select{width:280px;border:1px solid #aab4c0;border-radius:4px}
+    button{border:0;border-radius:4px;background:#1f6feb;color:white;cursor:pointer;margin-right:8px}
+    .secondary{background:#6b7280}.danger{background:#c92a2a}.msg{margin-top:16px;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>登录页面</h1>
+  <form id="login-form" data-testid="login-form">
+    <label for="username">用户名</label>
+    <input id="username" name="username" data-testid="username-input" aria-label="用户名" placeholder="请输入用户名" type="text">
+    <label for="password">密码</label>
+    <input id="password" name="password" data-testid="password-input" aria-label="密码" placeholder="请输入密码" type="password">
+    <label><input id="remember" data-testid="remember-me" type="checkbox"> 记住我</label>
+    <button id="login-submit" data-testid="login-submit" type="submit">登录</button>
+    <button class="secondary" type="button" data-testid="reset-login">重置</button>
+    <a id="forgot-password" data-testid="forgot-password-link" href="#forgot-password">忘记密码</a>
+  </form>
+  <p id="message" data-testid="login-message" role="status" class="msg"></p>
+</main>
+<script>
+  const form = document.querySelector("#login-form");
+  const message = document.querySelector("#message");
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const username = document.querySelector("#username").value.trim();
+    const password = document.querySelector("#password").value;
+    if (!password) message.textContent = "请输入密码";
+    else if (username === "admin" && password === "123456") message.textContent = "登录成功";
+    else message.textContent = "账号或密码错误";
+  });
+  document.querySelector("#forgot-password").addEventListener("click", () => {
+    message.textContent = "找回密码页面";
+    history.pushState({}, "", "/forgot-password");
+  });
+</script>
+</body>
+</html>

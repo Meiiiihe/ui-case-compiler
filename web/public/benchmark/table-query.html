@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>表格查询页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;background:#f7f9fb;color:#17202a}
+    main{max-width:820px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    label{display:block;margin:12px 0 6px;font-weight:600} input,select,button{font-size:16px;padding:8px 10px}
+    input,select{width:240px;border:1px solid #aab4c0;border-radius:4px} button{border:0;border-radius:4px;background:#1f6feb;color:white;margin-top:14px}
+    table{border-collapse:collapse;margin-top:16px;width:100%} td,th{border:1px solid #d8dee6;padding:8px}.msg{margin-top:16px;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>表格查询页面</h1>
+  <label for="order-keyword">订单关键词</label>
+  <input id="order-keyword" data-testid="order-keyword" aria-label="订单关键词" placeholder="输入订单号或客户">
+  <label for="order-status">订单状态</label>
+  <select id="order-status" data-testid="order-status" aria-label="订单状态">
+    <option value="">全部状态</option><option value="paid">已支付</option><option value="pending">待支付</option><option value="cancelled">已取消</option>
+  </select>
+  <button id="query-order" data-testid="query-order" type="button">查询</button>
+  <p id="query-message" data-testid="query-message" role="status" class="msg">等待查询</p>
+  <table data-testid="order-table"><thead><tr><th>订单号</th><th>客户</th><th>状态</th></tr></thead><tbody id="order-rows"></tbody></table>
+</main>
+<script>
+  const rows = document.querySelector("#order-rows");
+  const message = document.querySelector("#query-message");
+  document.querySelector("#query-order").addEventListener("click", () => {
+    const keyword = document.querySelector("#order-keyword").value.trim() || "A001";
+    const status = document.querySelector("#order-status").selectedOptions[0].textContent;
+    rows.innerHTML = `<tr><td>${keyword}</td><td>张三</td><td>${status === "全部状态" ? "已支付" : status}</td></tr>`;
+    message.textContent = "查询成功，找到 1 条记录";
+  });
+</script>
+</body>
+</html>

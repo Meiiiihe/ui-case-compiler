@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>商品筛选页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;background:#f7f9fb;color:#17202a}
+    main{max-width:780px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    label{display:block;margin:12px 0 6px;font-weight:600} input,select,button{font-size:16px;padding:8px 10px}
+    input,select{width:240px;border:1px solid #aab4c0;border-radius:4px} button{border:0;border-radius:4px;background:#1f6feb;color:white;margin-top:14px}
+    .msg{margin-top:16px;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>商品筛选页面</h1>
+  <label for="category">商品分类</label>
+  <select id="category" data-testid="category-select" aria-label="商品分类">
+    <option value="">全部分类</option><option value="phone">手机</option><option value="book">图书</option><option value="computer">电脑</option>
+  </select>
+  <label for="max-price">最高价格</label>
+  <input id="max-price" data-testid="max-price-input" aria-label="最高价格" placeholder="输入最高价格">
+  <label><input id="in-stock" data-testid="stock-checkbox" type="checkbox"> 仅看有货</label>
+  <button id="filter-button" data-testid="filter-submit" type="button">筛选</button>
+  <section id="filter-result" data-testid="filter-result" role="status" class="msg">显示全部商品</section>
+</main>
+<script>
+  document.querySelector("#filter-button").addEventListener("click", () => {
+    const category = document.querySelector("#category").value;
+    const stock = document.querySelector("#in-stock").checked;
+    const price = document.querySelector("#max-price").value.trim();
+    const label = category === "phone" ? "手机" : category === "book" ? "图书" : category === "computer" ? "电脑" : "全部商品";
+    document.querySelector("#filter-result").textContent = `${label}筛选结果${stock ? "，仅看有货" : ""}${price ? "，价格不超过" + price : ""}`;
+  });
+</script>
+</body>
+</html>

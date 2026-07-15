@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>记录编辑页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;background:#f7f9fb;color:#17202a}
+    main{max-width:760px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    label{display:block;margin:12px 0 6px;font-weight:600} input,button{font-size:16px;padding:8px 10px}
+    input{width:300px;border:1px solid #aab4c0;border-radius:4px} button{border:0;border-radius:4px;background:#1f6feb;color:white;margin:8px 8px 0 0}
+    .secondary{background:#6b7280}.msg{margin-top:16px;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>记录编辑页面</h1>
+  <button id="new-record" data-testid="new-record" type="button">新增记录</button>
+  <button id="edit-record" data-testid="edit-record" type="button" class="secondary">编辑记录</button>
+  <form id="record-form" data-testid="record-form">
+    <label for="record-name">记录名称</label>
+    <input id="record-name" data-testid="record-name" aria-label="记录名称" placeholder="请输入记录名称">
+    <label for="record-owner">负责人</label>
+    <input id="record-owner" data-testid="record-owner" aria-label="负责人" placeholder="请输入负责人">
+    <br><button id="save-record" data-testid="save-record" type="submit">保存记录</button>
+    <button id="cancel-record" data-testid="cancel-record" type="button" class="secondary">取消</button>
+  </form>
+  <p id="record-message" data-testid="record-message" role="status" class="msg"></p>
+</main>
+<script>
+  const message = document.querySelector("#record-message");
+  document.querySelector("#new-record").addEventListener("click", () => { message.textContent = "正在新增记录"; });
+  document.querySelector("#edit-record").addEventListener("click", () => { document.querySelector("#record-name").value = "旧记录"; message.textContent = "正在编辑记录"; });
+  document.querySelector("#record-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    message.textContent = document.querySelector("#record-name").value.trim() ? "保存成功" : "请填写记录名称";
+  });
+  document.querySelector("#cancel-record").addEventListener("click", () => { message.textContent = "已取消编辑"; });
+</script>
+</body>
+</html>

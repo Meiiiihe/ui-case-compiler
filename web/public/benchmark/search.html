@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>搜索页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;background:#f7f9fb;color:#17202a}
+    main{max-width:760px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    label{display:block;margin:12px 0 6px;font-weight:600} input,button{font-size:16px;padding:8px 10px}
+    input{width:320px;border:1px solid #aab4c0;border-radius:4px} button{border:0;border-radius:4px;background:#1f6feb;color:white;margin-right:8px}
+    .secondary{background:#6b7280}.result{margin-top:16px;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>搜索页面</h1>
+  <label for="keyword">搜索关键词</label>
+  <input id="keyword" data-testid="search-input" aria-label="搜索框" placeholder="请输入搜索关键词">
+  <button id="search-button" data-testid="search-submit" type="button">搜索</button>
+  <button id="clear-button" data-testid="search-clear" type="button" class="secondary">清空</button>
+  <section id="results" data-testid="search-results" role="status" class="result">暂无搜索结果</section>
+</main>
+<script>
+  const input = document.querySelector("#keyword");
+  const results = document.querySelector("#results");
+  document.querySelector("#search-button").addEventListener("click", () => {
+    const value = input.value.trim();
+    results.textContent = value ? `${value} 教程` : "请输入搜索关键词";
+  });
+  document.querySelector("#clear-button").addEventListener("click", () => {
+    input.value = "";
+    results.textContent = "暂无搜索结果";
+  });
+</script>
+</body>
+</html>

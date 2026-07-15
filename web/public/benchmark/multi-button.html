@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>多按钮页面</title>
+  <style>
+    body{font-family:Arial,"Microsoft YaHei",sans-serif;margin:32px;background:#f7f9fb;color:#17202a}
+    main{max-width:760px;margin:auto;background:white;border:1px solid #d8dee6;padding:24px;border-radius:8px}
+    button{font-size:16px;padding:8px 10px;border:0;border-radius:4px;background:#1f6feb;color:white;margin:8px 8px 0 0}
+    .secondary{background:#6b7280}.danger{background:#c92a2a}.msg{margin-top:18px;font-weight:700}
+  </style>
+</head>
+<body>
+<main>
+  <h1>多按钮页面</h1>
+  <p>这个页面故意放置多个相似按钮，用于测试模型是否能区分目标。</p>
+  <button id="save-draft" data-testid="save-draft" type="button">保存草稿</button>
+  <button id="save-submit" data-testid="save-submit" type="button">保存并提交</button>
+  <button id="submit-review" data-testid="submit-review" type="button">提交审核</button>
+  <button id="reset-form" data-testid="reset-form" type="button" class="secondary">重置</button>
+  <button id="cancel-form" data-testid="cancel-form" type="button" class="danger">取消</button>
+  <p id="button-message" data-testid="button-message" role="status" class="msg">等待操作</p>
+</main>
+<script>
+  const message = document.querySelector("#button-message");
+  const bind = (id, text) => document.querySelector(id).addEventListener("click", () => { message.textContent = text; });
+  bind("#save-draft", "草稿保存成功");
+  bind("#save-submit", "保存并提交成功");
+  bind("#submit-review", "提交审核成功");
+  bind("#reset-form", "表单已重置");
+  bind("#cancel-form", "操作已取消");
+</script>
+</body>
+</html>
